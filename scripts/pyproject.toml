@@ -13,6 +13,7 @@ dependencies = [
   "eth-account>=0.10.0",
   "requests>=2.32.0",
   "python-dotenv>=1.0.0",
+  "pyyaml>=6.0.2",
 ]
 
 [project.scripts]
