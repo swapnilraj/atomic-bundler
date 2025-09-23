@@ -7,7 +7,7 @@ Create two signed EIP-1559 transactions and submit as a bundle to Titan Hoodi:
 Reads env:
  - ETH_RPC_URL: RPC endpoint
  - TEST_PRIVATE_KEY: hex key (0x... or raw) for tx1 sender
- - SIGNER_PRIVATE_KEY (or PAYMENT_SIGNER_PRIVATE_KEY): hex key for tx2 sender (payment signer)
+ - PAYMENT_SIGNER_PRIVATE_KEY: hex key for tx2 sender (payment signer)
  - TEST_PRIVATE_ADDRESS (optional): address assertion for TEST_PRIVATE_KEY
  - PAYMENT_SIGNER_ADDRESS (optional): address assertion for SIGNER_PRIVATE_KEY
 
@@ -106,9 +106,9 @@ def main():
 
     rpc_url = os.getenv('ETH_RPC_URL', 'http://localhost:8545')
     test_key = os.getenv('TEST_PRIVATE_KEY')
-    signer_key = os.getenv('SIGNER_PRIVATE_KEY') or os.getenv('PAYMENT_SIGNER_PRIVATE_KEY')
+    signer_key = os.getenv('PAYMENT_SIGNER_PRIVATE_KEY')
     if not test_key or not signer_key:
-        raise SystemExit('TEST_PRIVATE_KEY and SIGNER_PRIVATE_KEY (or PAYMENT_SIGNER_PRIVATE_KEY) must be set in env')
+        raise SystemExit('TEST_PRIVATE_KEY and PAYMENT_SIGNER_PRIVATE_KEY must be set in env')
 
     # Config
     relay_url, builder_coinbase = read_config_builder(os.getenv('CONFIG_PATH', '../config.yaml'))
@@ -120,10 +120,9 @@ def main():
     # Fees and nonces
     latest = w3.eth.get_block('latest')
     base_fee = latest.get('baseFeePerGas', 20_000_000_000)
-    # Titan/Hoodi rejects tip=0. Default to 1 gwei; clamp to >=1 wei
-    max_prio = max(1, int(os.getenv('PRIORITY_FEE_WEI', '1000000000')))
-    # max_prio = 0
-    max_fee = base_fee * 2 + max_prio
+
+    max_prio = 1
+    max_fee = base_fee + max_prio
 
     test_key = normalize_key(test_key)
     signer_key = normalize_key(signer_key)

@@ -14,7 +14,6 @@
 .env
 .env.*
 !.env.example
-config.yaml
 
 # -----------------------------
 # Logs & Runtime Data
