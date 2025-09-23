@@ -1,0 +1,55 @@
+# -----------------------------
+# Rust / Cargo
+# -----------------------------
+/target/
+**/target/
+**/*.rs.bk
+
+# Generated docs
+/target/doc/
+
+# -----------------------------
+# Environment / Secrets
+# -----------------------------
+.env
+.env.*
+!.env.example
+config.yaml
+
+# -----------------------------
+# Logs & Runtime Data
+# -----------------------------
+/logs/
+*.log
+
+# SQLite databases
+/data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Coverage & Profiling
+/coverage/
+lcov.info
+*.profraw
+*.profdata
+
+# -----------------------------
+# Editor & OS files
+# -----------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.code-workspace
+
+# -----------------------------
+# Node (if present)
+# -----------------------------
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+

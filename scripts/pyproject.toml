@@ -1,0 +1,36 @@
+[project]
+name = "atomic-bundler-scripts"
+version = "0.1.0"
+description = "Utility scripts for Atomic Bundler"
+authors = [
+  { name = "Atomic Bundler Maintainers" }
+]
+requires-python = ">=3.10,<3.13"
+
+# Runtime dependencies for the scripts
+dependencies = [
+  "web3>=6.0.0",
+  "eth-account>=0.10.0",
+  "requests>=2.32.0",
+  "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+# Enables: `uv run create-test-tx` or install then run `create-test-tx`
+create-test-tx = "create_test_tx:create_test_tx"
+
+[build-system]
+requires = ["hatchling>=1.18.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# Include the single-module script in the wheel
+only-include = ["create_test_tx.py"]
+
+[tool.uv]
+# Prefer a local virtualenv inside scripts/.venv when using `uv venv`
+index-url = "https://pypi.org/simple"
+
+[tool.uv.workspace]
+# Treat this folder as an isolated uv project
+members = []

@@ -1,0 +1,94 @@
+# Atomic Bundler Configuration
+
+# Network configuration
+network:
+  network: mainnet
+  rpc_url: "https://eth-mainnet.alchemyapi.io/v2/YOUR_API_KEY"
+  chain_id: 1
+
+# Target block configuration
+targets:
+  blocks_ahead: 3        # Target next 3 blocks
+  resubmit_max: 3        # Maximum resubmission attempts
+  bundle_expiry_seconds: 300  # 5 minutes
+
+# Payment configuration
+payment:
+  formula: basefee       # flat|gas|basefee
+  k1: 1.0               # Multiplier for gas-based formulas
+  k2: "200000000000000" # Base fee (0.0002 ETH in wei)
+  max_amount_wei: "500000000000000"      # 0.0005 ETH
+  per_bundle_cap_wei: "2000000000000000" # 0.002 ETH
+  daily_cap_wei: "500000000000000000"    # 0.5 ETH
+
+# Spending limits
+limits:
+  per_bundle_cap_wei: "2000000000000000"    # 0.002 ETH
+  daily_cap_wei: "500000000000000000"       # 0.5 ETH
+  monthly_cap_wei: "15000000000000000000"   # 15 ETH (optional)
+  emergency_stop_enabled: true
+  emergency_stop_threshold_wei: "100000000000000000"  # 0.1 ETH
+
+# Builder relay configurations
+builders:
+  - name: flashbots
+    relay_url: "https://relay.flashbots.net"
+    payment_address: "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5"
+    enabled: true
+    timeout_seconds: 30
+    max_retries: 3
+    health_check_interval_seconds: 60
+
+  - name: beaverbuild
+    relay_url: "https://rpc.beaverbuild.org"
+    payment_address: "0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5"
+    enabled: true
+    timeout_seconds: 30
+    max_retries: 3
+    health_check_interval_seconds: 60
+
+  - name: titan
+    relay_url: "https://rpc.titanbuilder.xyz"
+    payment_address: "0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97"
+    enabled: true
+    timeout_seconds: 30
+    max_retries: 3
+    health_check_interval_seconds: 60
+
+# HTTP server configuration
+server:
+  host: "0.0.0.0"
+  port: 8080
+  request_timeout_seconds: 30
+  max_body_size: 1048576  # 1MB
+  cors_enabled: true
+
+# Database configuration
+database:
+  url: "sqlite:data/atomic_bundler.db"
+  max_connections: 10
+  connection_timeout_seconds: 30
+  wal_mode: true
+
+# Logging configuration
+logging:
+  level: "info"          # trace|debug|info|warn|error
+  format: "json"         # json|pretty
+  file_path: "logs/atomic_bundler.log"  # optional
+  request_logging: true
+  sql_logging: false
+
+# Metrics configuration
+metrics:
+  enabled: true
+  port: 9090
+  namespace: "atomic_bundler"
+  collection_interval_seconds: 30
+
+# Security configuration
+security:
+  admin_api_key: "your-admin-api-key-here"
+  rate_limiting_enabled: true
+  rate_limit_per_minute: 100
+  rate_limit_burst: 20
+  killswitch_enabled: true

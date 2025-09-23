@@ -1,0 +1,42 @@
+[package]
+name = "middleware"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "middleware"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace crates
+relay_client = { path = "../relay_client" }
+simulator = { path = "../simulator" }
+payment = { path = "../payment" }
+config = { path = "../config" }
+types = { path = "../types" }
+
+# External dependencies
+tokio.workspace = true
+axum.workspace = true
+tower = { workspace = true, features = ["util"] }
+tower-http.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+sqlx.workspace = true
+alloy.workspace = true
+async-trait.workspace = true
+dotenv.workspace = true
+
+[dev-dependencies]
+tokio-test = { workspace = true }
+wiremock = { workspace = true }

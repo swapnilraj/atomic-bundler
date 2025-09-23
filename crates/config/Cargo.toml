@@ -1,0 +1,27 @@
+[package]
+name = "config"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "config"
+path = "src/lib.rs"
+
+[dependencies]
+# Workspace crates
+types = { path = "../types" }
+
+# External dependencies
+serde.workspace = true
+serde_yaml.workspace = true
+figment.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+alloy.workspace = true
+
+[dev-dependencies]
+tempfile = { workspace = true }

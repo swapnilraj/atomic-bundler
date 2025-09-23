@@ -1,0 +1,22 @@
+# Clippy configuration for atomic-bundler
+msrv = "1.75.0"
+
+# Allowed by default
+avoid-breaking-exported-api = true
+cognitive-complexity-threshold = 30
+single-char-lifetime-names-threshold = 4
+trivial-copy-size-limit = 128
+type-complexity-threshold = 250
+verbose-bit-mask-threshold = 1
+
+# Custom allow list for this project
+allowed-scripts = ["Latin"]
+allowed-prefixes = ["to", "into", "from", "try_from", "try_into"]
+
+# Disallowed methods (empty for now, can be customized)
+disallowed-methods = []
+disallowed-types = []
+disallowed-macros = []
+
+# Documentation
+missing-docs-in-crate-items = false

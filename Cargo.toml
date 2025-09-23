@@ -1,0 +1,74 @@
+[workspace]
+members = [
+    "crates/middleware",
+    "crates/relay_client", 
+    "crates/simulator",
+    "crates/payment",
+    "crates/config",
+    "crates/types",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.81"
+authors = ["Atomic Bundler <support@atomicbundler.org>"]
+license = "MIT"
+repository = "https://github.com/swapnilraj/atomic-bundler"
+homepage = "https://github.com/swapnilraj/atomic-bundler"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+tokio-util = "0.7"
+
+# HTTP server and client
+axum = { version = "0.7", features = ["macros", "tracing"] }
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "timeout"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Ethereum
+alloy = { version = "0.4", features = [
+    "consensus",
+    "contract",
+    "eips", 
+    "json-rpc",
+    "network",
+    "providers",
+    "rpc-types",
+    "signers",
+    "transports",
+    "rlp",
+    "signer-local",
+    "provider-http",
+] }
+
+# Configuration
+figment = { version = "0.10", features = ["yaml", "env"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
+
+# Utilities
+uuid = { version = "1.6", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+async-trait = "0.1"
+hex = "0.4"
+dotenv = "0.15"
+tokio-test = "0.4"
+wiremock = "0.6"
+tempfile = "3.8"
+
+# Development dependencies
+[workspace.dev-dependencies]
