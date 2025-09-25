@@ -303,6 +303,7 @@ mod tests {
         let relay = BuilderRelay {
             name: "test".to_string(),
             relay_url: mock_server.uri(),
+            status_url: None,
             payment_address: Address::ZERO,
             enabled: true,
             timeout_seconds: 30,

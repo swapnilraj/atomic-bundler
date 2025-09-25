@@ -16,7 +16,7 @@ targets:
 payment:
   formula: flat       # flat|gas|basefee
   k1: 1.0               # Multiplier for gas-based formulas
-  k2: "200000000000000" # Base fee (0.0002 ETH in wei)
+  k2: "200000000000000" # Constant bribe (0.0002 ETH in wei)
   max_amount_wei: "5000000000000000"      # 0.005 ETH
   per_bundle_cap_wei: "20000000000000000" # 0.02 ETH
   daily_cap_wei: "500000000000000000"    # 0.5 ETH

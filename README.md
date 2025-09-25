@@ -115,7 +115,7 @@ targets:
 payment:
   formula: basefee      # flat|gas|basefee
   k1: 1.0               # multiplier for gas-based formulas
-  k2: 200000000000000   # base fee (0.0002 ETH)
+  k2: 200000000000000   # constant bribe
   max_amount_wei: 500000000000000
 limits:
   per_bundle_cap_wei: 2000000000000000    # 0.002 ETH
@@ -123,6 +123,7 @@ limits:
 builders:
   - name: flashbots
     relay_url: "https://relay.flashbots.net"
+    status_url: null
     payment_address: "0xabc...abc"
     enabled: true
 ```

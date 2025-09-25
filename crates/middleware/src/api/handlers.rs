@@ -235,6 +235,7 @@ pub async fn submit_bundle(
         let builder_relay = types::BuilderRelay {
             name: builder_config.name.clone(),
             relay_url: builder_config.relay_url.clone(),
+            status_url: builder_config.status_url.clone(),
             payment_address,
             enabled: builder_config.enabled,
             timeout_seconds: builder_config.timeout_seconds,

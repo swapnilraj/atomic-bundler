@@ -11,6 +11,9 @@ pub struct BuilderRelay {
     pub name: String,
     /// Relay URL endpoint
     pub relay_url: String,
+    /// Optional status endpoint (e.g., Titan stats API)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_url: Option<String>,
     /// Builder's payment address
     pub payment_address: Address,
     /// Whether this relay is enabled
@@ -236,6 +239,7 @@ impl Default for BuilderRelay {
         Self {
             name: "unknown".to_string(),
             relay_url: "https://relay.example.com".to_string(),
+            status_url: None,
             payment_address: Address::ZERO,
             enabled: true,
             timeout_seconds: 30,

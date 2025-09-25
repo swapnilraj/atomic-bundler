@@ -1,14 +1,38 @@
 # Testing Guide
 
+## ⚡ Quick E2E: Run middleware and submit via create_test_tx.py
+
+1. Start the middleware in one terminal:
+```bash
+cargo run --bin middleware
+```
+
+2. In another terminal, use uv with the scripts lockfile and run the helper:
+```bash
+cd scripts
+uv sync
+cd ..
+
+cp .env.example .env
+# Edit .env with TEST_PRIVATE_KEY and ETH_RPC_URL
+uv run --project scripts scripts/create_test_tx.py
+```
+
+What happens:
+- The script crafts an EIP-1559 tx1 with zero priority fee, signs it, and submits a bundle to `http://localhost:8080/bundles`.
+- It also writes `test_bundle_request.json` for manual `curl` if needed and optionally polls Titan stats when applicable.
+
 ## 🧪 Creating Test Transactions (tx1)
 
 The easiest way to test the atomic bundler without managing nonces manually.
 
-### Using the Python Test Script
+### Using the Python Test Script (uv with lockfile)
 
 ```bash
-# Install dependencies
-pip install web3 requests python-dotenv
+# Install the locked dependencies for the scripts project
+cd scripts
+uv sync
+cd ..
 
 # Option 1: Use .env file (recommended)
 cp .env.example .env
@@ -20,14 +44,14 @@ cp .env.example .env
 export TEST_PRIVATE_KEY=your_test_private_key_here
 export ETH_RPC_URL=your_rpc_url_here
 
-# Run script (automatically reads .env)
-python3 scripts/create_test_tx.py
+# Run script via uv (automatically reads .env)
+uv run --project scripts scripts/create_test_tx.py
 ```
 
 The script will automatically:
 - ✅ Get the current nonce from the network
 - ✅ Set priority fee to 0 (as required by atomic bundler)
-- ✅ Create a simple 0.001 ETH self-transfer transaction
+- ✅ Create a simple 0.0002 ETH self-transfer transaction
 - ✅ Sign the transaction and output the raw hex
 - ✅ Generate a complete curl command for testing
 - ✅ Save the bundle request to `test_bundle_request.json`

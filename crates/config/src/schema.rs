@@ -81,6 +81,8 @@ pub struct BuilderConfig {
     pub name: String,
     /// Relay URL
     pub relay_url: String,
+    /// Optional status endpoint for bundle stats
+    pub status_url: Option<String>,
     /// Payment address for this builder
     pub payment_address: String,
     /// Whether this builder is enabled
@@ -286,6 +288,7 @@ impl Config {
             relays.push(BuilderRelay {
                 name: builder.name.clone(),
                 relay_url: builder.relay_url.clone(),
+                status_url: builder.status_url.clone(),
                 payment_address,
                 enabled: builder.enabled,
                 timeout_seconds: builder.timeout_seconds,
@@ -360,6 +363,7 @@ impl Default for Config {
                 BuilderConfig {
                     name: "flashbots".to_string(),
                     relay_url: "https://relay.flashbots.net".to_string(),
+                    status_url: None,
                     payment_address: "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5".to_string(),
                     enabled: true,
                     timeout_seconds: default_timeout_seconds(),
