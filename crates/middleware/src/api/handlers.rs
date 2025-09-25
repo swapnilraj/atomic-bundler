@@ -86,10 +86,22 @@ pub async fn submit_bundle(
             .unwrap_or(20_000_000_000u64) // 20 gwei fallback
     );
 
+    // Estimate gas for tx1 using simulator helper (decode + eth_estimateGas)
+    let estimated_gas_used: u64 = match simulator::estimate_gas_from_raw(&rpc_url, &tx1_hex).await {
+        // Add 21_000 to the estimated gas used to account for the tx2
+        Ok(g) => g + 21_000u64,
+        Err(e) => {
+            tracing::warn!(error = %e, "tx1 gas estimation failed; defaulting to 21000");
+            21_000u64
+        }
+    };
+
+    tracing::info!(estimated_gas_used = estimated_gas_used, "Estimated gas used for tx1");
+
     // Calculate payment using PaymentCalculator to get priority fee
     let calculator = PaymentCalculator::new();
     let payment_params = PaymentParams {
-        gas_used: 21000, // ETH transfer
+        gas_used: estimated_gas_used,
         base_fee_per_gas,
         max_priority_fee_per_gas: U256::from(0u64), // 0 gwei default, will be calculated
         formula: PaymentFormula::Flat,
@@ -181,7 +193,7 @@ pub async fn submit_bundle(
     // Create a bundle for each enabled builder
     let mut bundles = Vec::new();
     
-    for (idx, builder) in enabled_builders.iter().enumerate() {
+    for builder in enabled_builders.iter() {
         // Parse builder payment address
         let builder_addr = Address::from_str(builder.payment_address.as_str())
             .map_err(|_| (
