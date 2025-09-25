@@ -2,23 +2,23 @@
 
 # Network configuration
 network:
-  network: hoodi
-  rpc_url: "https://0xrpc.io/hoodi"
-  chain_id: 560048
+  network: mainnet
+  chain_id: 1
 
 # Target block configuration
 targets:
-  blocks_ahead: 3        # Target next 3 blocks
+  blocks_ahead: 10        # Target next 10 blocks
   resubmit_max: 3        # Maximum resubmission attempts
   bundle_expiry_seconds: 300  # 5 minutes
+
 
 # Payment configuration
 payment:
   formula: flat       # flat|gas|basefee
   k1: 1.0               # Multiplier for gas-based formulas
-  k2: "200000000000000" # Base fee (0.0002 ETH in wei)
-  max_amount_wei: "5000000000000000"      # 0.005 ETH
-  per_bundle_cap_wei: "20000000000000000" # 0.02 ETH
+  k2: "300000000000000" # Base fee (0.0003 ETH in wei)# 0.0003 ETH
+  max_amount_wei: "500000000000000"      # 0.0005 ETH
+  per_bundle_cap_wei: "2000000000000000" # 0.002 ETH
   daily_cap_wei: "500000000000000000"    # 0.5 ETH
 
 # Spending limits
@@ -28,29 +28,28 @@ limits:
   monthly_cap_wei: "15000000000000000000"   # 15 ETH (optional)
   emergency_stop_enabled: true
   emergency_stop_threshold_wei: "100000000000000000"  # 0.1 ETH
-
 # Builder relay configurations
 builders:
 
   - name: titan
-    relay_url: "https://rpc-hoodi.titanbuilder.xyz/"
+    relay_url: "https://rpc.titanbuilder.xyz/"
     payment_address: "0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97"
     enabled: true
     timeout_seconds: 30
     max_retries: 3
     health_check_interval_seconds: 60
-
-# HTTP server configuration
-server:
-  host: "0.0.0.0"
-  port: 8080
-  request_timeout_seconds: 30
-  max_body_size: 1048576  # 1MB
-  cors_enabled: true
+  
+  - name: buildernet
+    relay_url: "https://rpc.buildernet.org"
+    payment_address: "0xdadB0d80178819F2319190D340ce9A924f783711"
+    enabled: false  # Disabled due to signature authentication requirement
+    timeout_seconds: 30
+    max_retries: 3
+    health_check_interval_seconds: 60
 
 # Database configuration
 database:
-  url: "sqlite:data/atomic_bundler.db"
+  url: "sqlite:data/atomic_bundler_mainnet.db"
   max_connections: 10
   connection_timeout_seconds: 30
   wal_mode: true

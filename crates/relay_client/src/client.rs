@@ -47,6 +47,25 @@ impl RelayClient {
             "Submitting bundle to relay"
         );
 
+        // Log exact outgoing JSON-RPC request for comparison/debugging
+        match serde_json::to_string(&request) {
+            Ok(body) => {
+                tracing::info!(
+                    relay = %self.relay.name,
+                    endpoint = %self.relay.relay_url,
+                    request_json = %body,
+                    "Outgoing eth_sendBundle request"
+                );
+            }
+            Err(e) => {
+                tracing::warn!(
+                    relay = %self.relay.name,
+                    error = %e,
+                    "Failed to serialize relay request to JSON"
+                );
+            }
+        }
+
         let response = timeout(
             Duration::from_secs(self.relay.timeout_seconds),
             self.http_client

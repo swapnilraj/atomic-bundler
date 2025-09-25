@@ -1,6 +1,7 @@
 //! Atomic Bundler Middleware - Main Application Entry Point
 
 use anyhow::{Context, Result};
+use clap::Parser;
 use config::ConfigLoader;
 use std::env;
 use tracing::{info, warn};
@@ -14,8 +15,21 @@ mod storage;
 
 use app::Application;
 
+/// Atomic Bundler Middleware - Builder-Paid Atomic Bundles
+#[derive(Parser)]
+#[command(name = "atomic-bundler")]
+#[command(about = "A middleware for creating builder-paid atomic bundles")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
+struct Cli {
+    /// Path to the configuration file
+    #[arg(short, long, default_value = "config.yaml")]
+    config: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Parse command line arguments
+    let cli = Cli::parse();
     // Load .env file if it exists
     if let Err(e) = dotenv::dotenv() {
         // Only warn if the error is not "file not found"
@@ -32,7 +46,12 @@ async fn main() -> Result<()> {
     info!("Starting Atomic Bundler v{}", env!("CARGO_PKG_VERSION"));
 
     // Load configuration
-    let config_path = env::var("CONFIG_PATH").unwrap_or_else(|_| "config.yaml".to_string());
+    // CLI argument takes precedence over environment variable
+    let config_path = if cli.config != "config.yaml" {
+        cli.config
+    } else {
+        env::var("CONFIG_PATH").unwrap_or_else(|_| cli.config)
+    };
     let config = ConfigLoader::load(&config_path)
         .context("Failed to load configuration")?;
 

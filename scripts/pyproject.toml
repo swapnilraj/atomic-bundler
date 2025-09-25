@@ -14,6 +14,7 @@ dependencies = [
   "requests>=2.32.0",
   "python-dotenv>=1.0.0",
   "pyyaml>=6.0.2",
+  "flashbots>=2.0.0",
 ]
 
 [project.scripts]

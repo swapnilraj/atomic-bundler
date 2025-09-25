@@ -9,6 +9,7 @@ use axum::{
 use serde_json::{json, Value};
 use std::sync::Arc;
 use types::BundleRequest;
+use alloy::primitives::keccak256;
 use uuid::Uuid;
 use payment::{PaymentCalculator, PaymentTransactionForger};
 use alloy::primitives::{Address, U256};
@@ -90,7 +91,7 @@ pub async fn submit_bundle(
     let payment_params = PaymentParams {
         gas_used: 21000, // ETH transfer
         base_fee_per_gas,
-        max_priority_fee_per_gas: U256::from(1_000_000_000u64), // 1 gwei default, will be calculated
+        max_priority_fee_per_gas: U256::from(0u64), // 0 gwei default, will be calculated
         formula: PaymentFormula::Flat,
         k1: state.config.payment.k1,
         k2: state.config.payment.k2,
@@ -106,11 +107,11 @@ pub async fn submit_bundle(
 
     let flat_amount_wei = payment_result.amount_wei;
 
-    // Use a reasonable max fee (2x base fee + priority fee)
-    let max_priority_fee_per_gas: u128 = 2_000_000_000; // 2 gwei
-    let max_fee_per_gas: u128 = (base_fee_per_gas * U256::from(2) + U256::from(max_priority_fee_per_gas))
+    let max_priority_fee_per_gas: u128 = 0;
+    let max_fee_per_gas: u128 = (((base_fee_per_gas * U256::from(3)) / U256::from(2))
+        + U256::from(max_priority_fee_per_gas))
         .try_into()
-        .unwrap_or(50_000_000_000u128); // 50 gwei fallback
+        .unwrap_or(2_000_000_000u128);
 
     let gas_limit: u64 = 21_000; // Standard ETH transfer
 
@@ -122,7 +123,7 @@ pub async fn submit_bundle(
         ))?
         .address();
 
-    let mut base_nonce: u64 = provider.get_transaction_count(signer_addr)
+    let base_nonce: u64 = provider.get_transaction_count(signer_addr)
         .await
         .map_err(|e| (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -131,13 +132,55 @@ pub async fn submit_bundle(
         .try_into()
         .unwrap_or(0);
 
+    // Ensure payment signer has enough balance for value + max gas cost
+    let signer_balance = provider.get_balance(signer_addr)
+        .await
+        .map_err(|e| (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": format!("Failed to get balance: {}", e) }))
+        ))?;
+
+    let required_wei = U256::from(gas_limit)
+        .checked_mul(U256::from(max_fee_per_gas))
+        .unwrap_or(U256::MAX)
+        .saturating_add(flat_amount_wei);
+
+    if signer_balance < required_wei {
+        tracing::warn!(
+            signer = %format!("0x{:x}", signer_addr),
+            balance_wei = %signer_balance,
+            required_wei = %required_wei,
+            gas_limit = gas_limit,
+            max_fee_per_gas = max_fee_per_gas,
+            payment_wei = %flat_amount_wei,
+            "Insufficient balance for tx2 (value + max gas). Consider lowering payment or max fee"
+        );
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(json!({
+                "error": "Insufficient balance for tx2 (value + max gas)",
+                "balanceWei": format!("{}", signer_balance),
+                "requiredWei": format!("{}", required_wei)
+            }))
+        ));
+    }
+
     let forger = PaymentTransactionForger::new();
     let target_blocks = request.targets.blocks;
     
+    // Compute tx1 hash for diagnostics (keccak256 of raw signed RLP)
+    let tx1_hash = {
+        let raw = tx1_hex.trim_start_matches("0x");
+        match alloy::hex::decode(raw) {
+            Ok(bytes) => format!("0x{}", alloy::hex::encode(keccak256(&bytes))),
+            Err(_) => "0x".to_string(),
+        }
+    };
+
     // Create a bundle for each enabled builder
     let mut bundles = Vec::new();
     
-    for builder in &enabled_builders {
+    for (idx, builder) in enabled_builders.iter().enumerate() {
         // Parse builder payment address
         let builder_addr = Address::from_str(builder.payment_address.as_str())
             .map_err(|_| (
@@ -145,8 +188,7 @@ pub async fn submit_bundle(
                 Json(json!({ "error": format!("Invalid builder payment address for {}", builder.name) }))
             ))?;
 
-        // Create tx2 for this specific builder
-        let tx2_hex = forger
+        let (tx2_hex, tx2_hash) = forger
             .forge_flat_transfer_hex(
                 builder_addr,
                 flat_amount_wei,
@@ -162,6 +204,16 @@ pub async fn submit_bundle(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(json!({ "error": format!("failed to forge tx2 for {}: {}", builder.name, e) }))
             ))?;
+
+        // Log the tx2 hash for this builder
+        tracing::info!(
+            builder = %builder.name,
+            tx2_hash = %tx2_hash,
+            tx2_to = %builder_addr,
+            tx2_value_wei = %flat_amount_wei,
+            tx1_hash = %tx1_hash,
+            "Forged tx2 payment transaction for builder"
+        );
 
         let txs = vec![tx1_hex.clone(), tx2_hex.clone()];
         bundles.push((builder.name.clone(), txs));
@@ -191,9 +243,24 @@ pub async fn submit_bundle(
         
         let relay_client = relay_client::RelayClient::new(builder_relay);
         
-        // Use first target block for now
-        let target_block = target_blocks.get(0).copied().unwrap_or(0);
+        // Prefer client-provided targets (like the script), fallback to computed latest+blocks_ahead
+        let requested_target = target_blocks.iter().copied().max().unwrap_or(0);
+        assert!(requested_target > 0, "Requested target block must be greater than 0");
+        assert!(requested_target > latest_block.header.number, "Requested target block must be greater than latest block");
+        let target_block = requested_target;
+        tracing::info!(
+            relay = %builder_name,
+            requested_target = ?requested_target,
+            chosen_target = target_block,
+            "Selected target block for bundle submission"
+        );
         
+        tracing::info!(
+            relay = %builder_name,
+            target_block = target_block,
+            "Preparing to submit bundle with computed target block"
+        );
+
         match relay_client.submit_bundle(txs.clone(), target_block).await {
             Ok(response) => {
                 tracing::info!(

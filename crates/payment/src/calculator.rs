@@ -39,7 +39,8 @@ impl PaymentCalculator {
 
     /// Calculate flat payment: payment = k2
     fn calculate_flat(&self, params: &PaymentParams) -> Result<U256> {
-        Ok(params.k2)
+        Ok(U256::from(200000000000000u64))
+        // Ok(params.k2)
     }
 
     /// Calculate gas-based payment: payment = k1 * gas_used + k2

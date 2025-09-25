@@ -37,7 +37,7 @@ impl PaymentTransactionForger {
         })
     }
 
-    /// Forge and sign an EIP-1559 ETH transfer and return raw signed tx hex.
+    /// Forge and sign an EIP-1559 ETH transfer and return raw signed tx hex and hash.
     pub async fn forge_flat_transfer_hex(
         &self,
         to: Address,
@@ -48,7 +48,7 @@ impl PaymentTransactionForger {
         max_priority_fee_per_gas: u128,
         gas_limit: u64,
         signer_key_hex: &str,
-    ) -> Result<String> {
+    ) -> Result<(String, String)> {
         // Build an EIP-1559 transaction envelope
         let mut tx = TxEip1559 {
             chain_id,
@@ -76,7 +76,10 @@ impl PaymentTransactionForger {
         let envelope: TxEnvelope = signed.into();
 
         let encoded = envelope.encoded_2718();
-        Ok(format!("0x{}", alloy::hex::encode(encoded)))
+        let tx_hex = format!("0x{}", alloy::hex::encode(encoded));
+        let tx_hash_hex = format!("0x{}", alloy::hex::encode(tx_hash));
+        
+        Ok((tx_hex, tx_hash_hex))
     }
 }
 
