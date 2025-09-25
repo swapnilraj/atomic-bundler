@@ -166,7 +166,8 @@ pub async fn submit_bundle(
     }
 
     let forger = PaymentTransactionForger::new();
-    let target_blocks = request.targets.blocks;
+    // Optional single target block accepted at API level
+    let requested_target_block = request.target_block;
     
     // Compute tx1 hash for diagnostics (keccak256 of raw signed RLP)
     let tx1_hash = {
@@ -243,30 +244,15 @@ pub async fn submit_bundle(
         
         let relay_client = relay_client::RelayClient::new(builder_relay);
         
-        // Prefer client-provided targets (like the script), fallback to computed latest+blocks_ahead
-        let requested_target = target_blocks.iter().copied().max().unwrap_or(0);
-        assert!(requested_target > 0, "Requested target block must be greater than 0");
-        assert!(requested_target > latest_block.header.number, "Requested target block must be greater than latest block");
-        let target_block = requested_target;
-        tracing::info!(
-            relay = %builder_name,
-            requested_target = ?requested_target,
-            chosen_target = target_block,
-            "Selected target block for bundle submission"
-        );
-        
-        tracing::info!(
-            relay = %builder_name,
-            target_block = target_block,
-            "Preparing to submit bundle with computed target block"
-        );
+        // If API provided a target block, include it; otherwise omit blockNumber
+        let chosen_target_opt = requested_target_block;
+        tracing::info!(relay = %builder_name, target = ?chosen_target_opt, "Preparing to submit bundle");
 
-        match relay_client.submit_bundle(txs.clone(), target_block).await {
+        match relay_client.submit_bundle(txs.clone(), chosen_target_opt).await {
             Ok(response) => {
                 tracing::info!(
                     bundle_id = %bundle_id,
                     builder = %builder_name,
-                    target_block = target_block,
                     relay_response = %response,
                     "Bundle submitted successfully"
                 );
@@ -296,7 +282,6 @@ pub async fn submit_bundle(
         bundle_id = %bundle_id,
         builders = ?enabled_builders.iter().map(|b| &b.name).collect::<Vec<_>>(),
         payment_wei = %flat_amount_wei,
-        targets = ?target_blocks,
         tx1_len = tx1_hex.len(),
         bundles_count = bundles.len(),
         "Created and submitted bundles for all enabled builders"

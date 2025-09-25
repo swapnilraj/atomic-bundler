@@ -102,9 +102,6 @@ def create_test_tx():
             "formula": "flat",
             "maxAmountWei": "100000000000000000",  # 0.1 ETH
             "expiry": expiry_time.isoformat()
-        },
-        "targets": {
-            "blocks": [latest_block.number + 1, latest_block.number + 10]
         }
     }
     
@@ -207,8 +204,7 @@ def create_test_tx():
 
             # ---- Poll on-chain inclusion for tx1 ----
             print("\n⏳ Monitoring on-chain inclusion for tx1...")
-            best_target = max(bundle_request['targets']['blocks'])
-            poll_deadline_blocks = best_target + 1
+            poll_deadline_blocks = latest_block.number + 1 + int(os.getenv('BLOCKS_AHEAD', '10'))
             poll_interval = int(os.getenv('POLL_INTERVAL_SECS', '5'))
             landed = False
 

@@ -39,7 +39,7 @@ impl RelayManager {
         let mut results = HashMap::new();
         
         for (name, client) in &self.clients {
-            let result = client.submit_bundle(transactions.clone(), target_block).await;
+            let result = client.submit_bundle(transactions.clone(), Some(target_block)).await;
             results.insert(name.clone(), result);
         }
 

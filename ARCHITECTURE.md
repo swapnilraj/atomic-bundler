@@ -141,8 +141,8 @@ sequenceDiagram
   API->>FORGE: build tx2 (ETH transfer/contract)
   FORGE-->>API: tx2 (signed)
   API->>BUND: assemble bundle [tx1, tx2]
-  BUND->>RM: send bundle request
-  RM->>REL: eth_sendBundle([tx1, tx2], N..N+k) (fan-out)
+  BUND->>RM: send bundle request (optional target_block)
+  RM->>REL: eth_sendBundle([tx1, tx2], blockNumber?) (fan-out)
   REL-->>OBS: inclusion/no-include signals
   OBS-->>API: update status (landed/expired)
   CH-->>API: receipts for tx1 + tx2 (if landed)

@@ -35,9 +35,10 @@ impl RelayClient {
     pub async fn submit_bundle(
         &self,
         transactions: Vec<String>,
-        target_block: u64,
+        target_block: Option<u64>,
     ) -> Result<String> {
         let request_id = self.generate_request_id();
+        // Target block is no longer required; pass None to omit it from the payload
         let request = RelayBundleRequest::new(request_id, transactions, target_block);
 
         tracing::info!(
@@ -243,7 +244,7 @@ mod tests {
 
         let client = RelayClient::new(relay);
         let result = client
-            .submit_bundle(vec!["0x123".to_string()], 12345)
+            .submit_bundle(vec!["0x123".to_string()], Some(12345))
             .await;
 
         assert!(result.is_ok());
@@ -279,7 +280,7 @@ mod tests {
 
         let client = RelayClient::new(relay);
         let result = client
-            .submit_bundle(vec!["0x123".to_string()], 12345)
+            .submit_bundle(vec!["0x123".to_string()], Some(12345))
             .await;
 
         assert!(result.is_err());

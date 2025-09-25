@@ -63,8 +63,9 @@ pub struct BundleRequest {
     pub tx1: Bytes,
     /// Payment configuration
     pub payment: PaymentRequest,
-    /// Target configuration
-    pub targets: TargetRequest,
+    /// Optional single target block number for inclusion
+    #[serde(default)]
+    pub target_block: Option<u64>,
 }
 
 /// Payment configuration for a bundle
@@ -80,14 +81,6 @@ pub struct PaymentRequest {
     /// Payment expiry timestamp
     pub expiry: DateTime<Utc>,
 }
-
-/// Target configuration for bundle submission
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TargetRequest {
-    /// Specific block numbers to target
-    pub blocks: Vec<u64>,
-}
-
 /// Response for bundle creation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BundleResponse {

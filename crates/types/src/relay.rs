@@ -42,8 +42,8 @@ pub struct RelayBundleParams {
     /// Array of signed transaction hex strings
     pub txs: Vec<String>,
     /// Target block number (hex)
-    #[serde(rename = "blockNumber")]
-    pub block_number: String,
+    #[serde(rename = "blockNumber", skip_serializing_if = "Option::is_none")]
+    pub block_number: Option<String>,
     /// Minimum timestamp for inclusion (optional)
     #[serde(rename = "minTimestamp", skip_serializing_if = "Option::is_none")]
     pub min_timestamp: Option<u64>,
@@ -182,15 +182,15 @@ pub struct RelayMetrics {
 }
 
 impl RelayBundleRequest {
-    /// Create a new bundle request
-    pub fn new(id: u64, txs: Vec<String>, block_number: u64) -> Self {
+    /// Create a new bundle request; if block_number is None, omit it
+    pub fn new(id: u64, txs: Vec<String>, block_number: Option<u64>) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),
             id,
             method: "eth_sendBundle".to_string(),
             params: vec![RelayBundleParams {
                 txs,
-                block_number: format!("0x{:x}", block_number),
+                block_number: block_number.map(|n| format!("0x{:x}", n)),
                 min_timestamp: None,
                 max_timestamp: None,
                 reverting_tx_hashes: None,

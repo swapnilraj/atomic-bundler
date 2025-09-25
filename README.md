@@ -61,11 +61,10 @@ curl -X POST http://localhost:8080/bundles \
     "payment": {
       "mode": "direct",
       "formula": "flat",
-      "maxAmountWei": "100000000000000000"
+      "maxAmountWei": "100000000000000000",
+      "expiry": "2025-01-01T12:00:00Z"
     },
-    "targets": {
-      "blocks": [19000000, 19000001]
-    }
+    "target_block": 19000010
   }'
 
 # Get bundle status
@@ -145,9 +144,7 @@ Content-Type: application/json
     "maxAmountWei": "500000000000000",
     "expiry": "2024-01-01T12:00:00Z"
   },
-  "targets": {
-    "blocks": [18500000, 18500001, 18500002]
-  }
+  "target_block": 18500005
 }
 ```
 
