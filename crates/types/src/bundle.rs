@@ -7,6 +7,7 @@ use alloy::{
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::payment::PaymentFormula;
 
 /// Unique identifier for a bundle
 pub type BundleId = Uuid;
@@ -74,7 +75,7 @@ pub struct PaymentRequest {
     /// Payment mode (direct, permit, escrow)
     pub mode: String,
     /// Payment formula (flat, gas, basefee)
-    pub formula: String,
+    pub formula: PaymentFormula,
     /// Maximum payment amount in wei
     #[serde(rename = "maxAmountWei")]
     pub max_amount_wei: String,

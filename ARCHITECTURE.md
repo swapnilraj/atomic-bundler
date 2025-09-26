@@ -122,7 +122,7 @@ Response to Client
 ```mermaid
 sequenceDiagram
   autonumber
-  participant UBS
+  participant User
   participant API as Ingress API
   participant SIM as Simulator
   participant STR as Strategy
@@ -133,7 +133,7 @@ sequenceDiagram
   participant OBS as Observer
   participant CH as Chain
 
-  UBS->>API: tx1 + payment policy
+  User->>API: tx1 + payment policy
   API->>SIM: simulate(tx1)
   SIM-->>API: {gasUsed, success, basefeeProjection}
   API->>STR: computePayment(gasUsed, basefee, policy)
