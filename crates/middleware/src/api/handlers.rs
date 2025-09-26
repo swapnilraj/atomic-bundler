@@ -33,10 +33,6 @@ pub async fn submit_bundle(
         ));
     }
 
-    // Minimal happy path:
-    // - compute flat payment from config (k2)
-    // - forge a signed tx2 via payment::forger
-    // - assemble [tx1, tx2] bundle and log
     let bundle_id = Uuid::new_v4();
 
     // Get all enabled builders
@@ -104,7 +100,7 @@ pub async fn submit_bundle(
         gas_used: estimated_gas_used,
         base_fee_per_gas,
         max_priority_fee_per_gas: U256::from(0u64), // 0 gwei default, will be calculated
-        formula: PaymentFormula::Flat,
+        formula: request.payment.formula.clone(),
         k1: state.config.payment.k1,
         k2: state.config.payment.k2,
         max_amount: U256::from_str(&state.config.payment.max_amount_wei.to_string())
